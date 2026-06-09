@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
@@ -7,12 +7,20 @@ import { calculateWeeklyReport, getStressLevelColor, formatTime } from '@/utils/
 import type { HealthReport, DailyRecord } from '@/types/health';
 
 const ReportPage: React.FC = () => {
-  const { dailyRecords } = useHealthStore();
+  const { dailyRecords, todayRecord, goals, loadTodayRecord } = useHealthStore();
   const [period, setPeriod] = useState<'week' | 'month'>('week');
+
+  useEffect(() => {
+    loadTodayRecord();
+  }, [loadTodayRecord]);
+
+  const waterGoal = goals.find(g => g.type === 'water');
+  const todayWater = todayRecord?.waterIntake || 0;
+  const waterProgress = waterGoal ? Math.min((todayWater / waterGoal.target) * 100, 100) : 0;
 
   const calculateMonthlyReport = (records: DailyRecord[]): HealthReport => {
     const monthRecords = records.slice(-30);
-    const validRecords = monthRecords.filter(r => r.steps > 0 || r.sleepHours > 0);
+    const validRecords = monthRecords.filter(r => r.steps > 0 || r.sleepHours > 0 || r.waterIntake > 0);
 
     const avgSteps = validRecords.length > 0
       ? Math.round(validRecords.reduce((sum, r) => sum + r.steps, 0) / validRecords.length)
@@ -32,6 +40,10 @@ const ReportPage: React.FC = () => {
       ), 0) / validRecords.length).toFixed(1))
       : 0;
 
+    const avgWater = validRecords.length > 0
+      ? Math.round(validRecords.reduce((sum, r) => sum + (r.waterIntake || 0), 0) / validRecords.length)
+      : 0;
+
     const exerciseDays = monthRecords.filter(r => r.exerciseMinutes > 0).length;
     const totalExerciseMinutes = monthRecords.reduce((sum, r) => sum + r.exerciseMinutes, 0);
 
@@ -45,6 +57,9 @@ const ReportPage: React.FC = () => {
     }
     if (avgStress > 6) {
       suggestions.push('长期压力偏高，建议每天安排10分钟呼吸训练时间。');
+    }
+    if (avgWater < 1500) {
+      suggestions.push('月均饮水量不足，建议养成定时喝水的好习惯。');
     }
     if (exerciseDays < 8) {
       suggestions.push('本月运动天数不足，建议每周至少运动2-3次，保持规律。');
@@ -64,6 +79,7 @@ const ReportPage: React.FC = () => {
       avgSleep,
       avgStress,
       avgMood,
+      avgWater,
       exerciseDays,
       totalExerciseMinutes,
       suggestions,
@@ -85,19 +101,21 @@ const ReportPage: React.FC = () => {
   }, [period, dailyRecords]);
 
   const healthScore = useMemo(() => {
-    const stepsScore = Math.min((report.avgSteps / 10000) * 25, 25);
-    const sleepScore = Math.min((report.avgSleep / 8) * 25, 25);
-    const stressScore = Math.max(0, 25 - (report.avgStress - 5) * 5);
-    const moodScore = (report.avgMood / 5) * 25;
-    return Math.round(stepsScore + sleepScore + stressScore + moodScore);
+    const stepsScore = Math.min((report.avgSteps / 10000) * 20, 20);
+    const sleepScore = Math.min((report.avgSleep / 8) * 20, 20);
+    const stressScore = Math.max(0, 20 - (report.avgStress - 5) * 4);
+    const moodScore = (report.avgMood / 5) * 20;
+    const waterScore = Math.min((report.avgWater / 2000) * 20, 20);
+    return Math.round(stepsScore + sleepScore + stressScore + moodScore + waterScore);
   }, [report]);
 
   const prevHealthScore = useMemo(() => {
-    const stepsScore = Math.min((prevReport.avgSteps / 10000) * 25, 25);
-    const sleepScore = Math.min((prevReport.avgSleep / 8) * 25, 25);
-    const stressScore = Math.max(0, 25 - (prevReport.avgStress - 5) * 5);
-    const moodScore = (prevReport.avgMood / 5) * 25;
-    return Math.round(stepsScore + sleepScore + stressScore + moodScore);
+    const stepsScore = Math.min((prevReport.avgSteps / 10000) * 20, 20);
+    const sleepScore = Math.min((prevReport.avgSleep / 8) * 20, 20);
+    const stressScore = Math.max(0, 20 - (prevReport.avgStress - 5) * 4);
+    const moodScore = (prevReport.avgMood / 5) * 20;
+    const waterScore = Math.min((prevReport.avgWater / 2000) * 20, 20);
+    return Math.round(stepsScore + sleepScore + stressScore + moodScore + waterScore);
   }, [prevReport]);
 
   const scoreDiff = healthScore - prevHealthScore;
@@ -105,7 +123,7 @@ const ReportPage: React.FC = () => {
   const chartData = useMemo(() => {
     const days = period === 'week' ? 7 : 30;
     const step = period === 'week' ? 1 : 5;
-    const data: { label: string; steps: number; sleep: number; stress: number }[] = [];
+    const data: { label: string; steps: number; sleep: number; stress: number; water: number }[] = [];
     const records = dailyRecords.slice(-days);
 
     for (let i = 0; i < records.length; i += step) {
@@ -113,6 +131,7 @@ const ReportPage: React.FC = () => {
       const avgSteps = Math.round(group.reduce((s, r) => s + r.steps, 0) / group.length);
       const avgSleep = Number((group.reduce((s, r) => s + r.sleepHours, 0) / group.length).toFixed(1));
       const avgStress = Number((group.reduce((s, r) => s + r.stressLevel, 0) / group.length).toFixed(1));
+      const avgWater = Math.round(group.reduce((s, r) => s + (r.waterIntake || 0), 0) / group.length);
       data.push({
         label: period === 'week'
           ? dayjs(group[0].date).format('ddd')
@@ -120,6 +139,7 @@ const ReportPage: React.FC = () => {
         steps: avgSteps,
         sleep: avgSleep,
         stress: avgStress,
+        water: avgWater,
       });
     }
     return data;
@@ -158,6 +178,9 @@ const ReportPage: React.FC = () => {
     if (report.avgStress <= 5) strengths.push('压力管理良好');
     else improvements.push('学习放松技巧');
 
+    if (report.avgWater >= 1500) strengths.push('饮水量充足');
+    else improvements.push('增加饮水量');
+
     if (report.exerciseDays >= (period === 'week' ? 3 : 10)) strengths.push('运动习惯稳定');
     else improvements.push('保持规律运动');
 
@@ -169,6 +192,7 @@ const ReportPage: React.FC = () => {
   const maxSteps = Math.max(...chartData.map(d => d.steps), 10000);
   const maxSleep = Math.max(...chartData.map(d => d.sleep), 10);
   const maxStress = Math.max(...chartData.map(d => d.stress), 10);
+  const maxWater = Math.max(...chartData.map(d => d.water), 2000);
 
   return (
     <ScrollView scrollY className={styles.page}>
@@ -202,6 +226,24 @@ const ReportPage: React.FC = () => {
               {scoreDiff >= 0 ? '↑' : '↓'} {Math.abs(scoreDiff)} 分 vs 上{period === 'week' ? '周' : '月'}
             </Text>
           </View>
+        </View>
+      </View>
+
+      <View className={styles.waterProgressCard}>
+        <View className={styles.waterHeader}>
+          <View className={styles.waterInfo}>
+            <Text className={styles.waterIcon}>💧</Text>
+            <View>
+              <Text className={styles.waterTitle}>今日饮水</Text>
+              <Text className={styles.waterProgress}>
+                {todayWater.toLocaleString()} / {waterGoal?.target.toLocaleString() || 2000} ml
+              </Text>
+            </View>
+          </View>
+          <Text className={styles.waterPercent}>{Math.round(waterProgress)}%</Text>
+        </View>
+        <View className={styles.waterProgressBar}>
+          <View className={styles.waterProgressFill} style={{ width: `${waterProgress}%` }} />
         </View>
       </View>
 
@@ -260,6 +302,20 @@ const ReportPage: React.FC = () => {
           </Text>
           <Text className={styles.statLabel}>心情指数 {report.avgMood.toFixed(1)}/5</Text>
         </View>
+
+        <View className={styles.statCard}>
+          <View className={styles.statHeader}>
+            <Text className={styles.statIcon}>💧</Text>
+            <Text className={`${styles.statTrend} ${getTrendIcon(report.avgWater, prevReport.avgWater).class}`}>
+              {getTrendIcon(report.avgWater, prevReport.avgWater).icon} {getTrendIcon(report.avgWater, prevReport.avgWater).text}
+            </Text>
+          </View>
+          <Text className={styles.statValue}>
+            {report.avgWater.toLocaleString()}
+            <Text className={styles.statUnit}> ml</Text>
+          </Text>
+          <Text className={styles.statLabel}>平均饮水</Text>
+        </View>
       </View>
 
       <Text className={styles.sectionTitle}>
@@ -282,6 +338,10 @@ const ReportPage: React.FC = () => {
             <View className={styles.legendDot} style={{ backgroundColor: '#F59E0B' }} />
             <Text className={styles.legendText}>压力</Text>
           </View>
+          <View className={styles.legendItem}>
+            <View className={styles.legendDot} style={{ backgroundColor: '#06B6D4' }} />
+            <Text className={styles.legendText}>饮水</Text>
+          </View>
         </View>
 
         <View className={styles.barChart}>
@@ -303,6 +363,12 @@ const ReportPage: React.FC = () => {
                 <View
                   className={`${styles.barItem} stress`}
                   style={{ height: `${(item.stress / maxStress) * 100}%` }}
+                />
+              </View>
+              <View>
+                <View
+                  className={`${styles.barItem} water`}
+                  style={{ height: `${(item.water / maxWater) * 100}%` }}
                 />
               </View>
             </View>

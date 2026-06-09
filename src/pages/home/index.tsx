@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Switch, PullDownRefresh } from '@tarojs/components';
+import { View, Text, ScrollView, Switch } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import dayjs from 'dayjs';
 import styles from './index.module.scss';
@@ -96,8 +96,13 @@ const HomePage: React.FC = () => {
   const enabledReminders = reminders.filter(r => r.enabled).slice(0, 3);
 
   return (
-    <PullDownRefresh onRefresh={handleRefresh} refreshing={isRefreshing}>
-      <ScrollView scrollY className={styles.page}>
+      <ScrollView
+        scrollY
+        className={styles.page}
+        refresherEnabled
+        refresherTriggered={isRefreshing}
+        onRefresherRefresh={handleRefresh}
+      >
         <View className={styles.header}>
           <View className={styles.greetingRow}>
             <View className={styles.greeting}>
@@ -212,7 +217,6 @@ const HomePage: React.FC = () => {
           ))}
         </View>
       </ScrollView>
-    </PullDownRefresh>
   );
 };
 

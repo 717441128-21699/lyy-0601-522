@@ -38,25 +38,41 @@ const loadFromStorage = (): Partial<PersistedState> => {
   return {};
 };
 
+const defaultPrivacySettings: PrivacySettings = {
+  shareHealthData: false,
+  allowNotifications: true,
+  biometricAuth: false,
+  dataEncryption: true,
+  autoBackup: true,
+};
+
+const getDefaultState = (): PersistedState => ({
+  dailyRecords: mockDailyRecords,
+  goals: mockGoals,
+  courses: mockCourses,
+  badges: mockBadges,
+  reminders: mockReminders,
+  breathingSessions: [],
+  privacySettings: defaultPrivacySettings,
+  userProfile: mockProfile,
+});
+
 const saveToStorage = (state: Partial<PersistedState>) => {
   try {
+    const existing = loadFromStorage();
+    const defaults = getDefaultState();
     const data: PersistedState = {
-      dailyRecords: state.dailyRecords || mockDailyRecords,
-      goals: state.goals || mockGoals,
-      courses: state.courses || mockCourses,
-      badges: state.badges || mockBadges,
-      reminders: state.reminders || mockReminders,
-      breathingSessions: state.breathingSessions || [],
-      privacySettings: state.privacySettings || {
-        shareHealthData: false,
-        allowNotifications: true,
-        biometricAuth: false,
-        dataEncryption: true,
-        autoBackup: true,
-      },
-      userProfile: state.userProfile || mockProfile,
+      dailyRecords: state.dailyRecords ?? existing.dailyRecords ?? defaults.dailyRecords,
+      goals: state.goals ?? existing.goals ?? defaults.goals,
+      courses: state.courses ?? existing.courses ?? defaults.courses,
+      badges: state.badges ?? existing.badges ?? defaults.badges,
+      reminders: state.reminders ?? existing.reminders ?? defaults.reminders,
+      breathingSessions: state.breathingSessions ?? existing.breathingSessions ?? defaults.breathingSessions,
+      privacySettings: state.privacySettings ?? existing.privacySettings ?? defaults.privacySettings,
+      userProfile: state.userProfile ?? existing.userProfile ?? defaults.userProfile,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    console.log('[Store] 已保存到本地存储:', Object.keys(state));
   } catch (e) {
     console.log('[Store] 保存本地存储失败:', e);
   }
@@ -121,23 +137,17 @@ const createEmptyTodayRecord = (): DailyRecord => ({
   caffeineIntake: 0,
 });
 
-const defaultPrivacySettings: PrivacySettings = {
-  shareHealthData: false,
-  allowNotifications: true,
-  biometricAuth: false,
-  dataEncryption: true,
-  autoBackup: true,
-};
+const defaultState = getDefaultState();
 
 export const useHealthStore = create<HealthState>((set, get) => ({
-  dailyRecords: persistedState.dailyRecords || mockDailyRecords,
-  goals: persistedState.goals || mockGoals,
-  courses: persistedState.courses || mockCourses,
-  badges: persistedState.badges || mockBadges,
-  reminders: persistedState.reminders || mockReminders,
-  breathingSessions: persistedState.breathingSessions || [],
-  privacySettings: persistedState.privacySettings || defaultPrivacySettings,
-  userProfile: persistedState.userProfile || mockProfile,
+  dailyRecords: persistedState.dailyRecords ?? defaultState.dailyRecords,
+  goals: persistedState.goals ?? defaultState.goals,
+  courses: persistedState.courses ?? defaultState.courses,
+  badges: persistedState.badges ?? defaultState.badges,
+  reminders: persistedState.reminders ?? defaultState.reminders,
+  breathingSessions: persistedState.breathingSessions ?? defaultState.breathingSessions,
+  privacySettings: persistedState.privacySettings ?? defaultState.privacySettings,
+  userProfile: persistedState.userProfile ?? defaultState.userProfile,
   todayRecord: null,
 
   loadTodayRecord: () => {

@@ -58,7 +58,7 @@ export const getSleepQualityColor = (quality: number): string => {
 
 export const calculateWeeklyReport = (records: DailyRecord[]): HealthReport => {
   const weekRecords = records.slice(-7);
-  const validRecords = weekRecords.filter(r => r.steps > 0 || r.sleepHours > 0);
+  const validRecords = weekRecords.filter(r => r.steps > 0 || r.sleepHours > 0 || r.waterIntake > 0);
   
   const avgSteps = validRecords.length > 0 
     ? Math.round(validRecords.reduce((sum, r) => sum + r.steps, 0) / validRecords.length)
@@ -75,6 +75,10 @@ export const calculateWeeklyReport = (records: DailyRecord[]): HealthReport => {
   const avgMood = validRecords.length > 0
     ? Number((validRecords.reduce((sum, r) => sum + getMoodScore(r.mood), 0) / validRecords.length).toFixed(1))
     : 0;
+
+  const avgWater = validRecords.length > 0
+    ? Math.round(validRecords.reduce((sum, r) => sum + (r.waterIntake || 0), 0) / validRecords.length)
+    : 0;
   
   const exerciseDays = weekRecords.filter(r => r.exerciseMinutes > 0).length;
   const totalExerciseMinutes = weekRecords.reduce((sum, r) => sum + r.exerciseMinutes, 0);
@@ -89,6 +93,9 @@ export const calculateWeeklyReport = (records: DailyRecord[]): HealthReport => {
   }
   if (avgStress > 6) {
     suggestions.push('压力水平较高，建议多做呼吸训练和冥想放松。');
+  }
+  if (avgWater < 1500) {
+    suggestions.push('饮水量不足，建议每天至少喝1500ml水，保持身体水分充足。');
   }
   if (exerciseDays < 3) {
     suggestions.push('运动天数较少，建议每周至少运动3次，保持身体健康。');
@@ -108,6 +115,7 @@ export const calculateWeeklyReport = (records: DailyRecord[]): HealthReport => {
     avgSleep,
     avgStress,
     avgMood,
+    avgWater,
     exerciseDays,
     totalExerciseMinutes,
     suggestions,

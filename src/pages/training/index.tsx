@@ -66,6 +66,7 @@ const TrainingPage: React.FC = () => {
   const startTimeRef = useRef<number>(0);
   const totalDurationRef = useRef<number>(0);
   const currentPhaseRef = useRef<'inhale' | 'hold' | 'exhale'>('inhale');
+  const isBreathingRef = useRef<boolean>(false);
 
   const weeklyMinutes = breathingSessions.reduce((sum, s) => sum + s.duration, 0);
   const weeklyCount = breathingSessions.length;
@@ -90,6 +91,7 @@ const TrainingPage: React.FC = () => {
     totalDurationRef.current = totalSeconds;
     startTimeRef.current = Date.now();
     currentPhaseRef.current = 'inhale';
+    isBreathingRef.current = true;
     
     setIsBreathing(true);
     setTimeLeft(totalSeconds);
@@ -98,8 +100,9 @@ const TrainingPage: React.FC = () => {
     setPhaseTimeLeft(0);
     
     setTimeout(() => {
-      runBreathingCycle();
+      console.log('[Training] 准备结束，开始呼吸循环');
       startCountdown();
+      runBreathingCycle();
     }, 2000);
   };
 
@@ -120,7 +123,10 @@ const TrainingPage: React.FC = () => {
     if (!mode) return;
 
     const nextPhase = () => {
-      if (!isBreathing && timeLeft <= 0) return;
+      if (!isBreathingRef.current) {
+        console.log('[Training] 停止呼吸循环');
+        return;
+      }
       
       const pattern = mode.pattern;
       let phaseDuration: number;
@@ -131,6 +137,7 @@ const TrainingPage: React.FC = () => {
           phaseDuration = pattern.inhale;
           setPhaseText('吸气');
           setBreathingPhase('inhale');
+          console.log('[Training] 切换到吸气', phaseDuration, '秒');
           break;
         case 'hold':
           if (pattern.hold === 0) {
@@ -141,11 +148,13 @@ const TrainingPage: React.FC = () => {
           phaseDuration = pattern.hold;
           setPhaseText('屏息');
           setBreathingPhase('hold');
+          console.log('[Training] 切换到屏息', phaseDuration, '秒');
           break;
         case 'exhale':
           phaseDuration = pattern.exhale;
           setPhaseText('呼气');
           setBreathingPhase('exhale');
+          console.log('[Training] 切换到呼气', phaseDuration, '秒');
           break;
         default:
           phaseDuration = pattern.inhale;
@@ -181,10 +190,14 @@ const TrainingPage: React.FC = () => {
   };
 
   const stopBreathing = (completed: boolean = false) => {
+    console.log('[Training] 停止呼吸训练, completed:', completed);
+    isBreathingRef.current = false;
     clearAllTimers();
     
     const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
     const actualDuration = Math.max(1, Math.round(elapsedSeconds / 60));
+    
+    console.log('[Training] 训练时长:', elapsedSeconds, '秒 =', actualDuration, '分钟');
     
     if (elapsedSeconds > 0) {
       addBreathingSession(selectedMode, actualDuration);

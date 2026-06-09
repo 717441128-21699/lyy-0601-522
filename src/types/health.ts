@@ -93,6 +93,7 @@ export interface HealthReport {
   avgSleep: number;
   avgStress: number;
   avgMood: number;
+  avgWater: number;
   exerciseDays: number;
   totalExerciseMinutes: number;
   suggestions: string[];

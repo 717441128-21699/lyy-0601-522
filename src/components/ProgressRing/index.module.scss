@@ -1,0 +1,37 @@
+@use '@/styles/variables.scss' as *;
+
+.progressRing {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg {
+  transform: rotate(0deg);
+}
+
+.bgCircle {
+  stroke: #f0f0f0;
+}
+
+.progressCircle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.label {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.percentage {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+}
+
+.unit {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

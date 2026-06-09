@@ -1,0 +1,285 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  padding: 0 $page-padding;
+  padding-bottom: 160rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg 0;
+}
+
+.dateText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.checkInStatus {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($color-success, 0.1);
+  border-radius: $radius-button;
+}
+
+.statusText {
+  font-size: $font-size-sm;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.section {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.moodSection {
+  .sectionTitle {
+    margin-bottom: $spacing-lg;
+  }
+}
+
+.sliderSection {
+  margin-bottom: $spacing-xl;
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sliderValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+}
+
+.sliderLabel {
+  font-size: $font-size-sm;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-md;
+  font-weight: $font-weight-medium;
+}
+
+.sliderIcons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $spacing-sm;
+  font-size: 32rpx;
+}
+
+.slider {
+  margin: 0 $spacing-xs;
+}
+
+.caffeineSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.caffeineInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.caffeineIcon {
+  font-size: 48rpx;
+}
+
+.caffeineText {
+  .cups {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+  
+  .mg {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-top: 4rpx;
+  }
+}
+
+.caffeineControls {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.controlBtn {
+  @include button-reset;
+  width: 64rpx;
+  height: 64rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  font-size: 32rpx;
+  color: $color-text-primary;
+  
+  &:active {
+    background: $color-border;
+  }
+}
+
+.countText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.specialSection {
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+  }
+  
+  .label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-md;
+    color: $color-text-primary;
+  }
+  
+  .noteInput {
+    width: 100%;
+    min-height: 120rpx;
+    padding: $spacing-md;
+    background: $color-bg-page;
+    border-radius: $radius-md;
+    font-size: $font-size-md;
+    color: $color-text-primary;
+    line-height: $line-height-normal;
+  }
+}
+
+.historySection {
+  .historyTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+  
+  .timeline {
+    position: relative;
+    padding-left: $spacing-xl;
+  }
+  
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16rpx;
+    top: 8rpx;
+    bottom: 8rpx;
+    width: 4rpx;
+    background: $color-border;
+    border-radius: $radius-round;
+  }
+  
+  .timelineItem {
+    position: relative;
+    padding-bottom: $spacing-lg;
+    
+    &:last-child {
+      padding-bottom: 0;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -48rpx;
+      top: 8rpx;
+      width: 20rpx;
+      height: 20rpx;
+      background: $color-primary;
+      border-radius: $radius-round;
+      border: 4rpx solid $color-bg-card;
+    }
+  }
+  
+  .itemHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+  }
+  
+  .itemDate {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+  }
+  
+  .itemMood {
+    font-size: 28rpx;
+  }
+  
+  .itemStats {
+    display: flex;
+    gap: $spacing-md;
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+  
+  .statItem {
+    display: flex;
+    align-items: center;
+    gap: 4rpx;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-md});
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.checkInBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+  
+  &.disabled {
+    background: $color-border;
+    color: $color-text-disabled;
+  }
+}

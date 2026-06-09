@@ -1,0 +1,345 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  padding: 0 $page-padding;
+  padding-bottom: 120rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin: $spacing-lg 0;
+}
+
+.statCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.statIcon {
+  font-size: 40rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.statValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin: $spacing-lg 0 $spacing-md;
+}
+
+.breathingModes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.modeCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  transition: all $transition-base;
+  border: 3rpx solid transparent;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &.selected {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.05);
+  }
+}
+
+.modeIcon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+}
+
+.modeName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.modeDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+  line-height: $line-height-normal;
+}
+
+.durationSelector {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.durationBtn {
+  @include button-reset;
+  padding: 0 $spacing-lg;
+  height: $button-height-sm;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.startBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xl;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.settingsCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.settingInfo {
+  flex: 1;
+}
+
+.settingName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.settingDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.historyList {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.historyIcon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  background: rgba($color-primary, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.historyContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.historyType {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.historyTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.historyDuration {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.breathingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+}
+
+.closeBtn {
+  @include button-reset;
+  position: absolute;
+  top: $spacing-xl;
+  right: $spacing-xl;
+  width: 72rpx;
+  height: 72rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-round;
+  color: #fff;
+  font-size: 32rpx;
+  
+  &:active {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.breathingTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: #fff;
+  margin-bottom: $spacing-lg;
+}
+
+.breathingCircle {
+  position: relative;
+  width: 400rpx;
+  height: 400rpx;
+  margin: $spacing-xl 0;
+}
+
+.circleOuter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.circleInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200rpx;
+  height: 200rpx;
+  margin: -100rpx 0 0 -100rpx;
+  background: linear-gradient(135deg, rgba($color-primary, 0.8) 0%, rgba($color-primary-light, 0.8) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 4s ease-in-out;
+  
+  &.inhale {
+    transform: scale(1.8);
+  }
+  
+  &.hold {
+    transform: scale(1.8);
+  }
+  
+  &.exhale {
+    transform: scale(1);
+  }
+}
+
+.circleText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: #fff;
+}
+
+.breathingPhase {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: #fff;
+  margin-top: $spacing-lg;
+}
+
+.breathingTimer {
+  font-size: $font-size-xl;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: $spacing-md;
+}
+
+.breathingInstruction {
+  font-size: $font-size-md;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: $spacing-xl;
+  text-align: center;
+  line-height: $line-height-loose;
+}

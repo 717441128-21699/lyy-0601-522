@@ -1,0 +1,110 @@
+@use '@/styles/variables.scss' as *;
+
+.badgeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $spacing-md;
+  transition: all $transition-base;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.sm {
+    padding: $spacing-sm;
+    
+    .icon {
+      width: 88rpx;
+      height: 88rpx;
+      
+      .emoji {
+        font-size: 44rpx;
+      }
+    }
+    
+    .title {
+      font-size: $font-size-sm;
+      margin-top: $spacing-xs;
+    }
+    
+    .description {
+      font-size: 20rpx;
+    }
+  }
+  
+  &.md {
+    .icon {
+      width: 120rpx;
+      height: 120rpx;
+      
+      .emoji {
+        font-size: 56rpx;
+      }
+    }
+    
+    .title {
+      font-size: $font-size-md;
+      margin-top: $spacing-sm;
+    }
+    
+    .description {
+      font-size: $font-size-xs;
+    }
+  }
+  
+  &.locked {
+    opacity: 0.6;
+    
+    .icon {
+      background: #f0f0f0;
+    }
+  }
+}
+
+.icon {
+  position: relative;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, rgba($color-primary, 0.1) 0%, rgba($color-primary-light, 0.15) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji {
+  line-height: 1;
+}
+
+.progressBar {
+  position: absolute;
+  bottom: -8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 8rpx;
+  background: #e5e5e5;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-round;
+  transition: width 0.3s ease;
+}
+
+.title {
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  max-width: 120rpx;
+}
+
+.description {
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  @include text-ellipsis;
+  max-width: 140rpx;
+}

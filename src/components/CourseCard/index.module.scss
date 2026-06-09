@@ -1,0 +1,125 @@
+@use '@/styles/variables.scss' as *;
+
+.courseCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 280rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.favorite {
+  position: absolute;
+  top: $spacing-sm;
+  right: $spacing-sm;
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.duration {
+  position: absolute;
+  bottom: $spacing-sm;
+  right: $spacing-sm;
+  padding: 8rpx 16rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: #fff;
+}
+
+.content {
+  padding: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.title {
+  flex: 1;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.difficulty {
+  flex-shrink: 0;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.description {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  @include text-ellipsis-multi(2);
+  margin-bottom: $spacing-md;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.categoryText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.completed {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.startBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.95);
+  }
+}

@@ -1,0 +1,72 @@
+@use '@/styles/variables.scss' as *;
+
+.moodSelector {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.moodItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-xs;
+  border-radius: $radius-lg;
+  border: 3rpx solid transparent;
+  transition: all $transition-base;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.sm {
+    padding: $spacing-sm $spacing-xs;
+    
+    .emoji {
+      font-size: 36rpx;
+    }
+    
+    .label {
+      font-size: 20rpx;
+      margin-top: 4rpx;
+    }
+  }
+  
+  &.md {
+    .emoji {
+      font-size: 48rpx;
+    }
+    
+    .label {
+      font-size: $font-size-sm;
+      margin-top: $spacing-xs;
+    }
+  }
+  
+  &.lg {
+    padding: $spacing-lg $spacing-sm;
+    
+    .emoji {
+      font-size: 64rpx;
+    }
+    
+    .label {
+      font-size: $font-size-md;
+      margin-top: $spacing-sm;
+    }
+  }
+  
+  &.active {
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  }
+}
+
+.emoji {
+  line-height: 1;
+}
+
+.label {
+  font-weight: $font-weight-medium;
+}

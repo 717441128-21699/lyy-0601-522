@@ -1,0 +1,280 @@
+import dayjs from 'dayjs';
+import type { DailyRecord, Goal, Course, Badge, Reminder, UserProfile } from '@/types/health';
+
+const generateMockRecords = (): DailyRecord[] => {
+  const records: DailyRecord[] = [];
+  const moods: DailyRecord['mood'][] = ['great', 'good', 'normal', 'good', 'great', 'normal', 'bad'];
+  
+  for (let i = 13; i >= 0; i--) {
+    const date = dayjs().subtract(i, 'day').format('YYYY-MM-DD');
+    const moodIndex = i % moods.length;
+    records.push({
+      id: `record-${date}`,
+      date,
+      mood: moods[moodIndex],
+      stressLevel: Math.floor(Math.random() * 5) + 3,
+      energyLevel: Math.floor(Math.random() * 5) + 3,
+      steps: Math.floor(Math.random() * 8000) + 3000,
+      exerciseMinutes: Math.floor(Math.random() * 60) + 10,
+      sleepHours: Math.random() * 3 + 5,
+      sleepQuality: Math.floor(Math.random() * 4) + 4,
+      waterIntake: Math.floor(Math.random() * 1500) + 1000,
+      caffeineIntake: Math.floor(Math.random() * 3),
+      isPeriodDay: i === 5 || i === 6,
+      checkInTime: '08:30',
+    });
+  }
+  return records;
+};
+
+export const mockDailyRecords: DailyRecord[] = generateMockRecords();
+
+export const mockGoals: Goal[] = [
+  {
+    id: 'goal-1',
+    type: 'steps',
+    title: '每日步数目标',
+    target: 8000,
+    current: 5234,
+    unit: '步',
+    startDate: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
+    endDate: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+    reminder: true,
+    reminderTime: '21:00',
+  },
+  {
+    id: 'goal-2',
+    type: 'exercise',
+    title: '每周运动时长',
+    target: 150,
+    current: 95,
+    unit: '分钟',
+    startDate: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
+    endDate: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+    reminder: true,
+    reminderTime: '18:00',
+  },
+  {
+    id: 'goal-3',
+    type: 'sleep',
+    title: '每日睡眠时长',
+    target: 8,
+    current: 6.5,
+    unit: '小时',
+    startDate: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
+    endDate: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+    reminder: true,
+    reminderTime: '22:30',
+  },
+  {
+    id: 'goal-4',
+    type: 'water',
+    title: '每日饮水量',
+    target: 2000,
+    current: 1200,
+    unit: '毫升',
+    startDate: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
+    endDate: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+    reminder: true,
+    reminderTime: '09:00',
+  },
+];
+
+export const mockCourses: Course[] = [
+  {
+    id: 'course-1',
+    title: '晨间唤醒呼吸',
+    description: '通过深呼吸唤醒身体，开启活力满满的一天',
+    category: 'breathing',
+    duration: 5,
+    difficulty: 'easy',
+    imageUrl: 'https://picsum.photos/id/1015/300/200',
+    isFavorite: true,
+    timesCompleted: 12,
+  },
+  {
+    id: 'course-2',
+    title: '减压放松呼吸',
+    description: '4-7-8呼吸法，快速缓解工作压力',
+    category: 'breathing',
+    duration: 10,
+    difficulty: 'easy',
+    imageUrl: 'https://picsum.photos/id/1018/300/200',
+    isFavorite: false,
+    timesCompleted: 8,
+  },
+  {
+    id: 'course-3',
+    title: '专注力提升冥想',
+    description: '提升注意力，帮助进入深度工作状态',
+    category: 'meditation',
+    duration: 15,
+    difficulty: 'medium',
+    imageUrl: 'https://picsum.photos/id/1036/300/200',
+    isFavorite: true,
+    timesCompleted: 5,
+  },
+  {
+    id: 'course-4',
+    title: '办公室肩颈拉伸',
+    description: '久坐后的肩颈放松，预防颈椎问题',
+    category: 'stretching',
+    duration: 8,
+    difficulty: 'easy',
+    imageUrl: 'https://picsum.photos/id/1039/300/200',
+    isFavorite: false,
+    timesCompleted: 20,
+  },
+  {
+    id: 'course-5',
+    title: '睡前舒缓冥想',
+    description: '放松身心，帮助快速入睡',
+    category: 'meditation',
+    duration: 20,
+    difficulty: 'medium',
+    imageUrl: 'https://picsum.photos/id/1044/300/200',
+    isFavorite: false,
+    timesCompleted: 3,
+  },
+  {
+    id: 'course-6',
+    title: '核心力量训练',
+    description: '办公室也能做的核心训练，增强体质',
+    category: 'strength',
+    duration: 12,
+    difficulty: 'medium',
+    imageUrl: 'https://picsum.photos/id/3/300/200',
+    isFavorite: false,
+    timesCompleted: 6,
+  },
+];
+
+export const mockBadges: Badge[] = [
+  {
+    id: 'badge-1',
+    title: '初次打卡',
+    description: '完成第一次健康打卡',
+    icon: '🌟',
+    unlocked: true,
+    unlockedDate: dayjs().subtract(14, 'day').format('YYYY-MM-DD'),
+    progress: 1,
+    target: 1,
+  },
+  {
+    id: 'badge-2',
+    title: '坚持一周',
+    description: '连续打卡7天',
+    icon: '🏆',
+    unlocked: true,
+    unlockedDate: dayjs().subtract(7, 'day').format('YYYY-MM-DD'),
+    progress: 7,
+    target: 7,
+  },
+  {
+    id: 'badge-3',
+    title: '运动达人',
+    description: '累计运动100分钟',
+    icon: '💪',
+    unlocked: true,
+    unlockedDate: dayjs().subtract(5, 'day').format('YYYY-MM-DD'),
+    progress: 100,
+    target: 100,
+  },
+  {
+    id: 'badge-4',
+    title: '睡眠大师',
+    description: '连续7天睡眠超过7小时',
+    icon: '😴',
+    unlocked: false,
+    progress: 4,
+    target: 7,
+  },
+  {
+    id: 'badge-5',
+    title: '步数王者',
+    description: '单日步数超过15000步',
+    icon: '👟',
+    unlocked: false,
+    progress: 8000,
+    target: 15000,
+  },
+  {
+    id: 'badge-6',
+    title: '冥想新手',
+    description: '完成10次冥想训练',
+    icon: '🧘',
+    unlocked: false,
+    progress: 5,
+    target: 10,
+  },
+  {
+    id: 'badge-7',
+    title: '半月达人',
+    description: '连续打卡15天',
+    icon: '🎖️',
+    unlocked: false,
+    progress: 14,
+    target: 15,
+  },
+  {
+    id: 'badge-8',
+    title: '控咖小能手',
+    description: '连续7天咖啡因不超过1杯',
+    icon: '☕',
+    unlocked: false,
+    progress: 3,
+    target: 7,
+  },
+];
+
+export const mockReminders: Reminder[] = [
+  {
+    id: 'reminder-1',
+    type: 'water',
+    title: '喝水提醒',
+    time: '09:00',
+    enabled: true,
+    repeat: 'daily',
+  },
+  {
+    id: 'reminder-2',
+    type: 'sedentary',
+    title: '久坐提醒',
+    time: '每小时',
+    enabled: true,
+    repeat: 'daily',
+  },
+  {
+    id: 'reminder-3',
+    type: 'sleep',
+    title: '入睡提醒',
+    time: '22:30',
+    enabled: true,
+    repeat: 'daily',
+  },
+  {
+    id: 'reminder-4',
+    type: 'wakeup',
+    title: '起床提醒',
+    time: '07:00',
+    enabled: true,
+    repeat: 'weekdays',
+  },
+  {
+    id: 'reminder-5',
+    type: 'exercise',
+    title: '运动提醒',
+    time: '18:00',
+    enabled: false,
+    repeat: 'daily',
+  },
+];
+
+export const mockProfile: UserProfile = {
+  name: '健康达人',
+  gender: 'female',
+  age: 28,
+  height: 165,
+  weight: 55,
+  targetWeight: 52,
+};

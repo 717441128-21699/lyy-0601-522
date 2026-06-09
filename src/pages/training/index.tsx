@@ -59,40 +59,74 @@ const TrainingPage: React.FC = () => {
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [timeLeft, setTimeLeft] = useState(0);
   const [phaseText, setPhaseText] = useState('准备开始');
+  const [phaseTimeLeft, setPhaseTimeLeft] = useState(0);
+  
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const phaseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const totalDurationRef = useRef<number>(0);
+  const currentPhaseRef = useRef<'inhale' | 'hold' | 'exhale'>('inhale');
 
   const weeklyMinutes = breathingSessions.reduce((sum, s) => sum + s.duration, 0);
   const weeklyCount = breathingSessions.length;
   const sedentaryReminder = reminders.find(r => r.type === 'sedentary');
 
+  const clearAllTimers = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (phaseTimerRef.current) {
+      clearInterval(phaseTimerRef.current);
+      phaseTimerRef.current = null;
+    }
+  };
+
   const startBreathing = () => {
     console.log('[Training] 开始呼吸训练:', selectedMode, selectedDuration);
+    clearAllTimers();
+    
+    const totalSeconds = selectedDuration * 60;
+    totalDurationRef.current = totalSeconds;
+    startTimeRef.current = Date.now();
+    currentPhaseRef.current = 'inhale';
+    
     setIsBreathing(true);
-    setTimeLeft(selectedDuration * 60);
+    setTimeLeft(totalSeconds);
     setPhaseText('准备开始');
+    setBreathingPhase('inhale');
+    setPhaseTimeLeft(0);
     
     setTimeout(() => {
       runBreathingCycle();
+      startCountdown();
     }, 2000);
+  };
+
+  const startCountdown = () => {
+    timerRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const remaining = Math.max(0, totalDurationRef.current - elapsed);
+      setTimeLeft(remaining);
+      
+      if (remaining <= 0) {
+        stopBreathing(true);
+      }
+    }, 1000);
   };
 
   const runBreathingCycle = () => {
     const mode = breathingModes.find(m => m.type === selectedMode);
     if (!mode) return;
 
-    let currentPhase: 'inhale' | 'hold' | 'exhale' = 'inhale';
-    let phaseTime = 0;
-
-    const cycle = () => {
-      if (timeLeft <= 0) {
-        stopBreathing();
-        return;
-      }
-
+    const nextPhase = () => {
+      if (!isBreathing && timeLeft <= 0) return;
+      
       const pattern = mode.pattern;
       let phaseDuration: number;
+      const phase = currentPhaseRef.current;
 
-      switch (currentPhase) {
+      switch (phase) {
         case 'inhale':
           phaseDuration = pattern.inhale;
           setPhaseText('吸气');
@@ -100,8 +134,8 @@ const TrainingPage: React.FC = () => {
           break;
         case 'hold':
           if (pattern.hold === 0) {
-            currentPhase = 'exhale';
-            cycle();
+            currentPhaseRef.current = 'exhale';
+            nextPhase();
             return;
           }
           phaseDuration = pattern.hold;
@@ -113,51 +147,49 @@ const TrainingPage: React.FC = () => {
           setPhaseText('呼气');
           setBreathingPhase('exhale');
           break;
+        default:
+          phaseDuration = pattern.inhale;
       }
 
-      phaseTime = phaseDuration;
+      setPhaseTimeLeft(phaseDuration);
+      let phaseRemaining = phaseDuration;
 
-      const phaseInterval = setInterval(() => {
-        phaseTime--;
-        if (phaseTime <= 0) {
-          clearInterval(phaseInterval);
-          if (currentPhase === 'inhale') {
-            currentPhase = 'hold';
-          } else if (currentPhase === 'hold') {
-            currentPhase = 'exhale';
-          } else {
-            currentPhase = 'inhale';
+      phaseTimerRef.current = setInterval(() => {
+        phaseRemaining--;
+        setPhaseTimeLeft(phaseRemaining);
+        
+        if (phaseRemaining <= 0) {
+          if (phaseTimerRef.current) {
+            clearInterval(phaseTimerRef.current);
+            phaseTimerRef.current = null;
           }
-          cycle();
+          
+          if (currentPhaseRef.current === 'inhale') {
+            currentPhaseRef.current = 'hold';
+          } else if (currentPhaseRef.current === 'hold') {
+            currentPhaseRef.current = 'exhale';
+          } else {
+            currentPhaseRef.current = 'inhale';
+          }
+          
+          nextPhase();
         }
       }, 1000);
-
-      timerRef.current = phaseInterval as unknown as NodeJS.Timeout;
     };
 
-    cycle();
-
-    const countdown = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(countdown);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    nextPhase();
   };
 
-  const stopBreathing = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
+  const stopBreathing = (completed: boolean = false) => {
+    clearAllTimers();
     
-    const completedTime = selectedDuration * 60 - timeLeft;
-    if (completedTime > 0) {
-      addBreathingSession(selectedMode, Math.ceil(completedTime / 60));
+    const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    const actualDuration = Math.max(1, Math.round(elapsedSeconds / 60));
+    
+    if (elapsedSeconds > 0) {
+      addBreathingSession(selectedMode, actualDuration);
       Taro.showToast({
-        title: `训练完成！${Math.ceil(completedTime / 60)}分钟`,
+        title: completed ? `训练完成！${actualDuration}分钟` : `已记录 ${actualDuration} 分钟`,
         icon: 'success',
       });
     }
@@ -165,6 +197,8 @@ const TrainingPage: React.FC = () => {
     setIsBreathing(false);
     setBreathingPhase('inhale');
     setPhaseText('准备开始');
+    setTimeLeft(0);
+    setPhaseTimeLeft(0);
   };
 
   const formatTime = (seconds: number) => {
@@ -281,7 +315,7 @@ const TrainingPage: React.FC = () => {
 
       {isBreathing && (
         <View className={styles.breathingOverlay}>
-          <View className={styles.closeBtn} onClick={stopBreathing}>
+          <View className={styles.closeBtn} onClick={() => stopBreathing(false)}>
             <Text>×</Text>
           </View>
           
@@ -294,7 +328,7 @@ const TrainingPage: React.FC = () => {
             </View>
           </View>
           
-          <Text className={styles.breathingPhase}>{phaseText}</Text>
+          <Text className={styles.breathingPhase}>{phaseText} {phaseTimeLeft > 0 ? `(${phaseTimeLeft}s)` : ''}</Text>
           <Text className={styles.breathingTimer}>剩余 {formatTime(timeLeft)}</Text>
           
           <Text className={styles.breathingInstruction}>

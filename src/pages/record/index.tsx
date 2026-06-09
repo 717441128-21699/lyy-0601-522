@@ -13,18 +13,24 @@ const RecordPage: React.FC = () => {
   const {
     todayRecord,
     dailyRecords,
+    goals,
     loadTodayRecord,
     setTodayMood,
     setTodayStress,
     setTodayEnergy,
+    setTodaySteps,
+    setTodayExercise,
     setTodayCaffeine,
     setTodaySpecialNote,
     checkInToday,
+    updateGoalProgress,
   } = useHealthStore();
 
   const [mood, setMood] = useState<MoodType>('normal');
   const [stressLevel, setStressLevel] = useState(5);
   const [energyLevel, setEnergyLevel] = useState(5);
+  const [steps, setSteps] = useState(0);
+  const [exerciseMinutes, setExerciseMinutes] = useState(0);
   const [caffeineCups, setCaffeineCups] = useState(0);
   const [isPeriodDay, setIsPeriodDay] = useState(false);
   const [specialNote, setSpecialNote] = useState('');
@@ -36,6 +42,8 @@ const RecordPage: React.FC = () => {
       setMood(todayRecord.mood);
       setStressLevel(todayRecord.stressLevel);
       setEnergyLevel(todayRecord.energyLevel);
+      setSteps(todayRecord.steps || 0);
+      setExerciseMinutes(todayRecord.exerciseMinutes || 0);
       setCaffeineCups(todayRecord.caffeineIntake);
       setIsPeriodDay(todayRecord.isPeriodDay || false);
       setSpecialNote(todayRecord.specialNote || '');
@@ -57,6 +65,32 @@ const RecordPage: React.FC = () => {
   const handleEnergyChange = (value: number) => {
     setEnergyLevel(value);
     setTodayEnergy(value);
+  };
+
+  const handleStepsChange = (delta: number) => {
+    const newValue = Math.max(0, steps + delta);
+    console.log('[Record] 步数变更:', newValue);
+    setSteps(newValue);
+    setTodaySteps(newValue);
+  };
+
+  const handleQuickSteps = (value: number) => {
+    console.log('[Record] 快速步数:', value);
+    setSteps(value);
+    setTodaySteps(value);
+  };
+
+  const handleExerciseChange = (delta: number) => {
+    const newValue = Math.max(0, exerciseMinutes + delta);
+    console.log('[Record] 运动时长变更:', newValue);
+    setExerciseMinutes(newValue);
+    setTodayExercise(newValue);
+  };
+
+  const handleQuickExercise = (value: number) => {
+    console.log('[Record] 快速运动:', value);
+    setExerciseMinutes(value);
+    setTodayExercise(value);
   };
 
   const handleCaffeineChange = (delta: number) => {
@@ -81,6 +115,16 @@ const RecordPage: React.FC = () => {
     console.log('[Record] 完成打卡');
     checkInToday();
     setHasCheckedIn(true);
+
+    const stepsGoal = goals.find(g => g.type === 'steps');
+    if (stepsGoal) {
+      updateGoalProgress(stepsGoal.id, steps);
+    }
+    const exerciseGoal = goals.find(g => g.type === 'exercise');
+    if (exerciseGoal) {
+      updateGoalProgress(exerciseGoal.id, exerciseMinutes);
+    }
+
     Taro.showToast({
       title: '打卡成功！',
       icon: 'success',
@@ -174,6 +218,74 @@ const RecordPage: React.FC = () => {
           <View className={styles.sliderIcons}>
             <Text>😫</Text>
             <Text>⚡</Text>
+          </View>
+        </View>
+      </View>
+
+      <View className={classnames(styles.section, styles.exerciseSection)}>
+        <Text className={styles.sectionTitle}>今日运动</Text>
+        <View className={styles.inputRow}>
+          <View className={styles.inputLabel}>
+            <Text className={styles.icon}>👟</Text>
+            <Text>今日步数</Text>
+          </View>
+          <View className={styles.inputControls}>
+            <View className={styles.inputBtn} onClick={() => handleStepsChange(-500)}>
+              <Text>−</Text>
+            </View>
+            <View className={styles.inputValue}>
+              {steps.toLocaleString()}
+              <Text className={styles.unit}>步</Text>
+            </View>
+            <View className={styles.inputBtn} onClick={() => handleStepsChange(500)}>
+              <Text>+</Text>
+            </View>
+          </View>
+        </View>
+        <View className={styles.quickBtns}>
+          <View className={styles.quickBtn} onClick={() => handleQuickSteps(3000)}>
+            <Text>3000步</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickSteps(5000)}>
+            <Text>5000步</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickSteps(8000)}>
+            <Text>8000步</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickSteps(10000)}>
+            <Text>10000步</Text>
+          </View>
+        </View>
+        <View className={styles.inputRow} style={{ marginTop: 32 }}>
+          <View className={styles.inputLabel}>
+            <Text className={styles.icon}>💪</Text>
+            <Text>运动时长</Text>
+          </View>
+          <View className={styles.inputControls}>
+            <View className={styles.inputBtn} onClick={() => handleExerciseChange(-10)}>
+              <Text>−</Text>
+            </View>
+            <View className={styles.inputValue}>
+              {exerciseMinutes}
+              <Text className={styles.unit}>分钟</Text>
+            </View>
+            <View className={styles.inputBtn} onClick={() => handleExerciseChange(10)}>
+              <Text>+</Text>
+            </View>
+          </View>
+        </View>
+        <View className={styles.quickBtns}>
+          <View className={styles.quickBtn} onClick={() => handleQuickExercise(15)}>
+            <Text>15分钟</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickExercise(30)}>
+            <Text>30分钟</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickExercise(45)}>
+            <Text>45分钟</Text>
+          </View>
+          <View className={styles.quickBtn} onClick={() => handleQuickExercise(60)}>
+            <Text>60分钟</Text>
           </View>
         </View>
       </View>

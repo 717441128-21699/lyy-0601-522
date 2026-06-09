@@ -147,6 +147,89 @@
   text-align: center;
 }
 
+.exerciseSection {
+  .inputRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-lg;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .inputLabel {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-md;
+    color: $color-text-primary;
+
+    .icon {
+      font-size: 36rpx;
+    }
+  }
+
+  .inputControls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  .inputBtn {
+    @include button-reset;
+    width: 56rpx;
+    height: 56rpx;
+    background: $color-bg-hover;
+    border-radius: $radius-round;
+    font-size: 28rpx;
+    color: $color-text-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:active {
+      background: $color-border;
+    }
+  }
+
+  .inputValue {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    min-width: 120rpx;
+    text-align: center;
+
+    .unit {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      font-weight: $font-weight-regular;
+      margin-left: 4rpx;
+    }
+  }
+
+  .quickBtns {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    margin-top: $spacing-sm;
+  }
+
+  .quickBtn {
+    @include button-reset;
+    padding: $spacing-xs $spacing-md;
+    background: rgba($color-primary, 0.1);
+    border-radius: $radius-md;
+    font-size: $font-size-xs;
+    color: $color-primary;
+
+    &:active {
+      background: rgba($color-primary, 0.2);
+    }
+  }
+}
+
 .specialSection {
   .row {
     display: flex;

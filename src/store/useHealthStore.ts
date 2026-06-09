@@ -13,6 +13,57 @@ import type {
 } from '@/types/health';
 import { mockDailyRecords, mockGoals, mockCourses, mockBadges, mockReminders, mockProfile } from '@/data/mockHealth';
 
+const STORAGE_KEY = 'health_app_state';
+
+interface PersistedState {
+  dailyRecords: DailyRecord[];
+  goals: Goal[];
+  courses: Course[];
+  badges: Badge[];
+  reminders: Reminder[];
+  breathingSessions: BreathingSession[];
+  privacySettings: PrivacySettings;
+  userProfile: UserProfile;
+}
+
+const loadFromStorage = (): Partial<PersistedState> => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.log('[Store] 加载本地存储失败:', e);
+  }
+  return {};
+};
+
+const saveToStorage = (state: Partial<PersistedState>) => {
+  try {
+    const data: PersistedState = {
+      dailyRecords: state.dailyRecords || mockDailyRecords,
+      goals: state.goals || mockGoals,
+      courses: state.courses || mockCourses,
+      badges: state.badges || mockBadges,
+      reminders: state.reminders || mockReminders,
+      breathingSessions: state.breathingSessions || [],
+      privacySettings: state.privacySettings || {
+        shareHealthData: false,
+        allowNotifications: true,
+        biometricAuth: false,
+        dataEncryption: true,
+        autoBackup: true,
+      },
+      userProfile: state.userProfile || mockProfile,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.log('[Store] 保存本地存储失败:', e);
+  }
+};
+
+const persistedState = loadFromStorage();
+
 interface HealthState {
   dailyRecords: DailyRecord[];
   goals: Goal[];
@@ -70,21 +121,23 @@ const createEmptyTodayRecord = (): DailyRecord => ({
   caffeineIntake: 0,
 });
 
+const defaultPrivacySettings: PrivacySettings = {
+  shareHealthData: false,
+  allowNotifications: true,
+  biometricAuth: false,
+  dataEncryption: true,
+  autoBackup: true,
+};
+
 export const useHealthStore = create<HealthState>((set, get) => ({
-  dailyRecords: mockDailyRecords,
-  goals: mockGoals,
-  courses: mockCourses,
-  badges: mockBadges,
-  reminders: mockReminders,
-  breathingSessions: [],
-  privacySettings: {
-    shareHealthData: false,
-    allowNotifications: true,
-    biometricAuth: false,
-    dataEncryption: true,
-    autoBackup: true,
-  },
-  userProfile: mockProfile,
+  dailyRecords: persistedState.dailyRecords || mockDailyRecords,
+  goals: persistedState.goals || mockGoals,
+  courses: persistedState.courses || mockCourses,
+  badges: persistedState.badges || mockBadges,
+  reminders: persistedState.reminders || mockReminders,
+  breathingSessions: persistedState.breathingSessions || [],
+  privacySettings: persistedState.privacySettings || defaultPrivacySettings,
+  userProfile: persistedState.userProfile || mockProfile,
   todayRecord: null,
 
   loadTodayRecord: () => {
@@ -104,10 +157,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), mood });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodayStress: (level) => {
@@ -121,10 +176,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), stressLevel: level });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodayEnergy: (level) => {
@@ -138,10 +195,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), energyLevel: level });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodaySteps: (steps) => {
@@ -155,10 +214,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), steps });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodayExercise: (minutes) => {
@@ -172,10 +233,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), exerciseMinutes: minutes });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodaySleep: (hours, quality) => {
@@ -189,10 +252,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), sleepHours: hours, sleepQuality: quality });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodayWater: (intake) => {
@@ -206,10 +271,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), waterIntake: intake });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodayCaffeine: (intake) => {
@@ -223,10 +290,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), caffeineIntake: intake });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   setTodaySpecialNote: (note, isPeriod) => {
@@ -242,10 +311,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), ...updateData });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   checkInToday: () => {
@@ -260,10 +331,12 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       records.push({ ...createEmptyTodayRecord(), checkInTime });
     }
     
-    set({ 
+    const newState = { 
       dailyRecords: records,
       todayRecord: records.find(r => r.date === today) || null
-    });
+    };
+    set(newState);
+    saveToStorage({ dailyRecords: records });
   },
 
   correctRecord: (date, record) => {
@@ -275,6 +348,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
     }
     
     set({ dailyRecords: records });
+    saveToStorage({ dailyRecords: records });
   },
 
   addGoal: (goal) => {
@@ -283,7 +357,9 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       id: `goal-${Date.now()}`,
       current: 0,
     };
-    set({ goals: [...get().goals, newGoal] });
+    const goals = [...get().goals, newGoal];
+    set({ goals });
+    saveToStorage({ goals });
   },
 
   updateGoalProgress: (id, current) => {
@@ -291,10 +367,13 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       g.id === id ? { ...g, current } : g
     );
     set({ goals });
+    saveToStorage({ goals });
   },
 
   deleteGoal: (id) => {
-    set({ goals: get().goals.filter(g => g.id !== id) });
+    const goals = get().goals.filter(g => g.id !== id);
+    set({ goals });
+    saveToStorage({ goals });
   },
 
   toggleCourseFavorite: (id) => {
@@ -302,6 +381,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       c.id === id ? { ...c, isFavorite: !c.isFavorite } : c
     );
     set({ courses });
+    saveToStorage({ courses });
   },
 
   markCourseCompleted: (id) => {
@@ -309,6 +389,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       c.id === id ? { ...c, timesCompleted: c.timesCompleted + 1 } : c
     );
     set({ courses });
+    saveToStorage({ courses });
   },
 
   addBreathingSession: (type, duration) => {
@@ -319,7 +400,9 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       date: getTodayDate(),
       completed: true,
     };
-    set({ breathingSessions: [...get().breathingSessions, session] });
+    const breathingSessions = [...get().breathingSessions, session];
+    set({ breathingSessions });
+    saveToStorage({ breathingSessions });
   },
 
   toggleReminder: (id) => {
@@ -327,6 +410,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       r.id === id ? { ...r, enabled: !r.enabled } : r
     );
     set({ reminders });
+    saveToStorage({ reminders });
   },
 
   updateReminder: (id, reminder) => {
@@ -334,13 +418,18 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       r.id === id ? { ...r, ...reminder } : r
     );
     set({ reminders });
+    saveToStorage({ reminders });
   },
 
   updatePrivacySettings: (settings) => {
-    set({ privacySettings: { ...get().privacySettings, ...settings } });
+    const privacySettings = { ...get().privacySettings, ...settings };
+    set({ privacySettings });
+    saveToStorage({ privacySettings });
   },
 
   updateUserProfile: (profile) => {
-    set({ userProfile: { ...get().userProfile, ...profile } });
+    const userProfile = { ...get().userProfile, ...profile };
+    set({ userProfile });
+    saveToStorage({ userProfile });
   },
 }));

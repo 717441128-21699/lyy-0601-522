@@ -11,10 +11,12 @@ const SleepPage: React.FC = () => {
     todayRecord,
     dailyRecords,
     reminders,
+    goals,
     loadTodayRecord,
     setTodaySleep,
     toggleReminder,
     updateReminder,
+    updateGoalProgress,
   } = useHealthStore();
 
   const [sleepHours, setSleepHours] = useState(6.5);
@@ -28,23 +30,62 @@ const SleepPage: React.FC = () => {
       setSleepHours(todayRecord.sleepHours || 6.5);
       setSleepQuality(todayRecord.sleepQuality || 6);
     }
-  }, [todayRecord]);
+    const sleepReminder = reminders.find(r => r.type === 'sleep');
+    const wakeReminder = reminders.find(r => r.type === 'wakeup');
+    if (sleepReminder) {
+      setBedTime(sleepReminder.time);
+    }
+    if (wakeReminder) {
+      setWakeTime(wakeReminder.time);
+    }
+  }, [todayRecord, reminders]);
 
   const handleSave = () => {
     console.log('[Sleep] 保存睡眠记录:', { sleepHours, sleepQuality, bedTime, wakeTime });
     setTodaySleep(sleepHours, sleepQuality);
+
+    const sleepReminder = reminders.find(r => r.type === 'sleep');
+    const wakeReminder = reminders.find(r => r.type === 'wakeup');
+    if (sleepReminder) {
+      updateReminder(sleepReminder.id, { time: bedTime });
+    }
+    if (wakeReminder) {
+      updateReminder(wakeReminder.id, { time: wakeTime });
+    }
+
+    const sleepGoal = goals.find(g => g.type === 'sleep');
+    if (sleepGoal) {
+      updateGoalProgress(sleepGoal.id, sleepHours);
+    }
+
     Taro.showToast({
       title: '睡眠记录已保存',
       icon: 'success',
     });
   };
 
+  const calculateSleepHours = (bed: string, wake: string) => {
+    const [bedH, bedM] = bed.split(':').map(Number);
+    const [wakeH, wakeM] = wake.split(':').map(Number);
+    let bedMinutes = bedH * 60 + bedM;
+    let wakeMinutes = wakeH * 60 + wakeM;
+    if (wakeMinutes <= bedMinutes) {
+      wakeMinutes += 24 * 60;
+    }
+    const diffMinutes = wakeMinutes - bedMinutes;
+    return Number((diffMinutes / 60).toFixed(1));
+  };
+
   const handleBedTimeChange = (e: any) => {
-    setBedTime(e.detail.value);
+    const newBedTime = e.detail.value;
+    setBedTime(newBedTime);
+    setSleepHours(calculateSleepHours(newBedTime, wakeTime));
   };
 
   const handleWakeTimeChange = (e: any) => {
-    setWakeTime(e.detail.value);
+    const newWakeTime = e.detail.value;
+    setWakeTime(newWakeTime);
+    setSleepHours(calculateSleepHours(bedTime, newWakeTime));
   };
 
   const sleepReminder = reminders.find(r => r.type === 'sleep');

@@ -6,7 +6,7 @@ import styles from './index.module.scss';
 import { useHealthStore } from '@/store/useHealthStore';
 import StatCard from '@/components/StatCard';
 import ProgressRing from '@/components/ProgressRing';
-import { getMoodInfo, getReminderTypeIcon, calculateBMI } from '@/utils/health';
+import { getMoodInfo, getReminderTypeIcon, calculateBMI, formatTime } from '@/utils/health';
 
 const HomePage: React.FC = () => {
   const {
@@ -17,7 +17,9 @@ const HomePage: React.FC = () => {
     userProfile,
     loadTodayRecord,
     setTodaySteps,
+    setTodayWater,
     toggleReminder,
+    updateGoalProgress,
   } = useHealthStore();
 
   const [greeting, setGreeting] = useState('');
@@ -65,7 +67,11 @@ const HomePage: React.FC = () => {
         break;
       case 'water':
         const newWater = (todayRecord?.waterIntake || 0) + 250;
-        setTodaySteps(newWater);
+        setTodayWater(newWater);
+        const waterGoal = goals.find(g => g.type === 'water');
+        if (waterGoal) {
+          updateGoalProgress(waterGoal.id, newWater);
+        }
         Taro.showToast({ title: '已记录 +250ml', icon: 'success' });
         break;
       default:

@@ -63,10 +63,13 @@ const TrainingPage: React.FC = () => {
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const phaseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const prepTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const totalDurationRef = useRef<number>(0);
+  const selectedDurationRef = useRef<number>(0);
   const currentPhaseRef = useRef<'inhale' | 'hold' | 'exhale'>('inhale');
   const isBreathingRef = useRef<boolean>(false);
+  const inPrepPhaseRef = useRef<boolean>(false);
 
   const weeklyMinutes = breathingSessions.reduce((sum, s) => sum + s.duration, 0);
   const weeklyCount = breathingSessions.length;
@@ -81,6 +84,10 @@ const TrainingPage: React.FC = () => {
       clearInterval(phaseTimerRef.current);
       phaseTimerRef.current = null;
     }
+    if (prepTimerRef.current) {
+      clearTimeout(prepTimerRef.current);
+      prepTimerRef.current = null;
+    }
   };
 
   const startBreathing = () => {
@@ -89,9 +96,10 @@ const TrainingPage: React.FC = () => {
     
     const totalSeconds = selectedDuration * 60;
     totalDurationRef.current = totalSeconds;
-    startTimeRef.current = Date.now();
+    selectedDurationRef.current = selectedDuration;
     currentPhaseRef.current = 'inhale';
     isBreathingRef.current = true;
+    inPrepPhaseRef.current = true;
     
     setIsBreathing(true);
     setTimeLeft(totalSeconds);
@@ -99,8 +107,11 @@ const TrainingPage: React.FC = () => {
     setBreathingPhase('inhale');
     setPhaseTimeLeft(0);
     
-    setTimeout(() => {
+    prepTimerRef.current = setTimeout(() => {
       console.log('[Training] 准备结束，开始呼吸循环');
+      inPrepPhaseRef.current = false;
+      startTimeRef.current = Date.now();
+      prepTimerRef.current = null;
       startCountdown();
       runBreathingCycle();
     }, 2000);
@@ -190,23 +201,49 @@ const TrainingPage: React.FC = () => {
   };
 
   const stopBreathing = (completed: boolean = false) => {
-    console.log('[Training] 停止呼吸训练, completed:', completed);
+    console.log('[Training] 停止呼吸训练, completed:', completed, 'inPrepPhase:', inPrepPhaseRef.current);
+    
     isBreathingRef.current = false;
     clearAllTimers();
     
+    if (inPrepPhaseRef.current) {
+      console.log('[Training] 准备阶段关闭，不记录训练');
+      inPrepPhaseRef.current = false;
+      setIsBreathing(false);
+      setBreathingPhase('inhale');
+      setPhaseText('准备开始');
+      setTimeLeft(0);
+      setPhaseTimeLeft(0);
+      return;
+    }
+    
     const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
-    const actualDuration = Math.max(1, Math.round(elapsedSeconds / 60));
+    const totalSeconds = selectedDurationRef.current * 60;
+    const isFullDuration = completed && Math.abs(elapsedSeconds - totalSeconds) <= 5;
     
-    console.log('[Training] 训练时长:', elapsedSeconds, '秒 =', actualDuration, '分钟');
+    let actualDuration: number;
+    if (isFullDuration) {
+      actualDuration = selectedDurationRef.current;
+      console.log('[Training] 完整训练完成，使用选择时长:', actualDuration, '分钟');
+    } else {
+      actualDuration = Math.floor(elapsedSeconds / 60);
+      console.log('[Training] 提前结束，实际时长:', elapsedSeconds, '秒 =', actualDuration, '分钟');
+    }
     
-    if (elapsedSeconds > 0) {
+    if (actualDuration >= 1) {
       addBreathingSession(selectedMode, actualDuration);
       Taro.showToast({
         title: completed ? `训练完成！${actualDuration}分钟` : `已记录 ${actualDuration} 分钟`,
         icon: 'success',
       });
+    } else if (elapsedSeconds > 0) {
+      Taro.showToast({
+        title: '训练时间不足1分钟',
+        icon: 'none',
+      });
     }
     
+    inPrepPhaseRef.current = false;
     setIsBreathing(false);
     setBreathingPhase('inhale');
     setPhaseText('准备开始');
